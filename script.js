@@ -373,14 +373,14 @@ document.addEventListener('DOMContentLoaded', function() {
     pdfHeader.style.overflow = 'hidden';
     pdfHeader.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
     
-    const pdfHeaderImg = document.createElement('img');
-    pdfHeaderImg.src = 'SpecialtyWebheader-ExportPDF.jpg';
-    pdfHeaderImg.style.width = '100%';
-    pdfHeaderImg.style.maxWidth = '3150px';
-    pdfHeaderImg.style.height = 'auto';
-    pdfHeaderImg.style.display = 'block';
+    const headerImg = document.createElement('img');
+    headerImg.src = 'SpecialtyWebheader-ExportPDF.jpg';
+    headerImg.style.width = '100%';
+    headerImg.style.maxWidth = '3150px';
+    headerImg.style.height = 'auto';
+    headerImg.style.display = 'block';
     
-    pdfHeader.appendChild(pdfHeaderImg);
+    pdfHeader.appendChild(headerImg);
     pdfContainer.insertBefore(pdfHeader, pdfContainer.firstChild);Header.style.marginBottom = '15px';
     pdfHeader.style.textAlign = 'center';
     

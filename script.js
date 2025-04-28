@@ -28,13 +28,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     try {
       // Fetch the Excel file
-      const excelData = await window.fetch('Specialty2025SAAG.xlsx')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.arrayBuffer();
-        });
+      const response = await fetch('Specialty2025SAAG.xlsx');
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      const excelData = await response.arrayBuffer();
       
       // Parse the Excel file
       const workbook = XLSX.read(new Uint8Array(excelData), {
@@ -251,11 +249,16 @@ document.addEventListener('DOMContentLoaded', function() {
   function createEventElement(event) {
     const timeCategory = getTimeCategory(event["Time Start"]);
     const isTicketed = event["Event Type"] === "Ticketed";
+    const isNetworking = event["Event Type"] === "Networking";
+    const isSetup = event["Event Type"] === "Setup";
     
     const element = document.createElement('div');
     element.className = `event ${timeCategory}`;
     if (isTicketed) {
       element.classList.add('ticketed');
+    }
+    if (isNetworking || isSetup) {
+      element.classList.add('italic-title');
     }
     
     // Event title - this will always be shown
@@ -275,10 +278,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const details = document.createElement('div');
     details.className = 'event-details';
     
-    // Add all the expanded details
+    // Add expanded details (excluding Event name and Time which are already shown)
     const detailsHTML = `
-      <div><strong>Event:</strong> ${event.Event}</div>
-      <div><strong>Time:</strong> ${event["Time Start"]} - ${event["Time End"]}</div>
       <div><strong>Event Details:</strong> ${event["Event Details"] || 'No details available'}</div>
       <div><strong>Location:</strong> ${event.Location || 'TBD'}</div>
       <div><strong>Event Type:</strong> ${event["Event Type"]}</div>
@@ -299,7 +300,7 @@ document.addEventListener('DOMContentLoaded', function() {
       element.appendChild(badge);
     }
     
-    // Add click event to expand/collapse for all events (not just ticketed)
+    // Add click event to expand/collapse for all events
     element.addEventListener('click', function() {
       this.classList.toggle('expanded');
     });
@@ -367,6 +368,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const pdfHeader = document.createElement('div');
     pdfHeader.style.width = '100%';
     pdfHeader.style.marginBottom = '15px';
+    pdfHeader.style.textAlign = 'center';
+    pdfHeader.style.borderRadius = '8px';
+    pdfHeader.style.overflow = 'hidden';
+    pdfHeader.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+    
+    const pdfHeaderImg = document.createElement('img');
+    pdfHeaderImg.src = 'SpecialtyWebheader-ExportPDF.jpg';
+    pdfHeaderImg.style.width = '100%';
+    pdfHeaderImg.style.maxWidth = '3150px';
+    pdfHeaderImg.style.height = 'auto';
+    pdfHeaderImg.style.display = 'block';
+    
+    pdfHeader.appendChild(pdfHeaderImg);
+    pdfContainer.insertBefore(pdfHeader, pdfContainer.firstChild);Header.style.marginBottom = '15px';
     pdfHeader.style.textAlign = 'center';
     
     const pdfHeaderImg = document.createElement('img');
@@ -529,132 +544,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const morningColor = document.createElement('span');
     morningColor.style.width = '10px';
     morningColor.style.height = '10px';
-    morningColor.style.backgroundColor = '#e6f4ff';
-    morningColor.style.border = '1px solid #b3d7ff';
-    morningColor.style.display = 'inline-block';
-    morningColor.style.marginRight = '3px';
-    morningLegend.appendChild(morningColor);
-    morningLegend.appendChild(document.createTextNode('Morning'));
-    
-    // Afternoon legend
-    const afternoonLegend = document.createElement('div');
-    afternoonLegend.style.display = 'flex';
-    afternoonLegend.style.alignItems = 'center';
-    const afternoonColor = document.createElement('span');
-    afternoonColor.style.width = '10px';
-    afternoonColor.style.height = '10px';
-    afternoonColor.style.backgroundColor = '#ffede6';
-    afternoonColor.style.border = '1px solid #ffcbb3';
-    afternoonColor.style.display = 'inline-block';
-    afternoonColor.style.marginRight = '3px';
-    afternoonLegend.appendChild(afternoonColor);
-    afternoonLegend.appendChild(document.createTextNode('Afternoon'));
-    
-    // Evening legend
-    const eveningLegend = document.createElement('div');
-    eveningLegend.style.display = 'flex';
-    eveningLegend.style.alignItems = 'center';
-    const eveningColor = document.createElement('span');
-    eveningColor.style.width = '10px';
-    eveningColor.style.height = '10px';
-    eveningColor.style.backgroundColor = '#f0e6ff';
-    eveningColor.style.border = '1px solid #d6b3ff';
-    eveningColor.style.display = 'inline-block';
-    eveningColor.style.marginRight = '3px';
-    eveningLegend.appendChild(eveningColor);
-    eveningLegend.appendChild(document.createTextNode('Evening'));
-    
-    // Ticketed legend
-    const ticketedLegend = document.createElement('div');
-    ticketedLegend.style.display = 'flex';
-    ticketedLegend.style.alignItems = 'center';
-    const ticketedColor = document.createElement('span');
-    ticketedColor.style.width = '10px';
-    ticketedColor.style.height = '10px';
-    ticketedColor.style.border = '1px solid #ccc';
-    ticketedColor.style.borderRightWidth = '6px';
-    ticketedColor.style.borderRightColor = '#4a7aff';
-    ticketedColor.style.display = 'inline-block';
-    ticketedColor.style.marginRight = '3px';
-    ticketedLegend.appendChild(ticketedColor);
-    ticketedLegend.appendChild(document.createTextNode('Ticketed Event'));
-    
-    // Networking/Setup legend (italic)
-    const italicLegend = document.createElement('div');
-    italicLegend.style.display = 'flex';
-    italicLegend.style.alignItems = 'center';
-    const italicText = document.createElement('span');
-    italicText.textContent = 'Abc';
-    italicText.style.fontStyle = 'italic';
-    italicText.style.marginRight = '3px';
-    italicLegend.appendChild(italicText);
-    italicLegend.appendChild(document.createTextNode('Networking/Setup'));
-    
-    // Add legends to row
-    legendRow.appendChild(morningLegend);
-    legendRow.appendChild(afternoonLegend);
-    legendRow.appendChild(eveningLegend);
-    legendRow.appendChild(ticketedLegend);
-    
-    // Add legend row to container
-    pdfContainer.appendChild(legendRow);
-    
-    // Temporarily add the cloned container to the document for rendering
-    pdfContainer.style.position = 'absolute';
-    pdfContainer.style.left = '-9999px';
-    document.body.appendChild(pdfContainer);
-    
-    // Use html2canvas to capture the container
-    html2canvas(pdfContainer, {
-      scale: 2.5, // Higher scale for better text clarity
-      useCORS: true,
-      logging: false,
-      width: 1100,
-      imageTimeout: 0,
-      backgroundColor: '#ffffff',
-      letterRendering: true, // Improve text rendering
-      allowTaint: true,
-      useCORS: true
-    }).then(canvas => {
-      // Remove the temporary container
-      document.body.removeChild(pdfContainer);
-      
-      // Create PDF in landscape orientation (11x8.5 inches)
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'in',
-        format: 'letter',
-        compress: true // Enable compression to reduce file size
-      });
-      
-      // Calculate the scaling ratio to fit the canvas to the PDF
-      const imgWidth = 11 - 0.4; // Landscape letter width minus margins
-      const imgHeight = 8.5 - 0.4; // Landscape letter height minus margins
-      const canvasRatio = canvas.height / canvas.width;
-      const pdfRatio = imgHeight / imgWidth;
-      
-      let finalWidth = imgWidth;
-      let finalHeight = imgWidth * canvasRatio;
-      
-      // Adjust if the image is too tall
-      if (finalHeight > imgHeight) {
-        finalHeight = imgHeight;
-        finalWidth = imgHeight / canvasRatio;
-      }
-      
-      // Center the image on the page
-      const offsetX = (11 - finalWidth) / 2;
-      const offsetY = (8.5 - finalHeight) / 2;
-      
-      // Add the image to the PDF with quality settings
-      const imgData = canvas.toDataURL('image/png', 1.0); // Use PNG for best text clarity
-      pdf.addImage(imgData, 'PNG', offsetX, offsetY, finalWidth, finalHeight, undefined, 'FAST');
-      
-      // Save the PDF
-      pdf.save('schedule-at-a-glance.pdf');
-    });
-  });px';
     morningColor.style.backgroundColor = '#e6f4ff';
     morningColor.style.border = '1px solid #b3d7ff';
     morningColor.style.display = 'inline-block';

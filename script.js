@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
   let filteredEvents = [];
   let selectedDay = null;
   let lastUpdated = '';
-  let alertShown = null; // Variable to track the alert
   
   // Initialize
   fetchScheduleData();
@@ -328,9 +327,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // PDF Export functionality
   exportPdfBtn.addEventListener('click', function() {
-    // Show processing message
-    alertShown = alert("Generating PDF, please wait...");
-    
     try {
       // Create a clone of the schedule to modify for PDF export
       const originalContainer = document.getElementById('schedule-container');
@@ -375,12 +371,23 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       
       // Replace the header image with the PDF-specific one
-      const headerImage = pdfContainer.querySelector('.header-image img');
-      if (headerImage) {
-        headerImage.src = 'SpecialtyWebheader-ExportPDF.jpg';
-        headerImage.style.width = '100%';
-        headerImage.style.height = 'auto';
+      // Create a new header image for the PDF
+      const headerImageContainer = pdfContainer.querySelector('.header-image');
+      if (headerImageContainer) {
+        // Create a new image element to avoid any caching issues
+        const newHeaderImg = document.createElement('img');
+        newHeaderImg.src = 'SpecialtyWebheader-ExportPDF.jpg';
+        newHeaderImg.alt = 'Specialty Congress 2025 Header';
+        newHeaderImg.style.width = '100%';
+        newHeaderImg.style.height = 'auto';
+        
+        // Replace the old image with the new one
+        headerImageContainer.innerHTML = '';
+        headerImageContainer.appendChild(newHeaderImg);
       }
+      
+      // Check if the events are currently expanded or collapsed
+      const areEventsExpanded = expandCollapseToggle.checked;
       
       // Group events by day
       const eventsByDay = {};
@@ -452,6 +459,10 @@ document.addEventListener('DOMContentLoaded', function() {
           
           const eventEl = document.createElement('div');
           eventEl.className = `event-pdf ${timeCategory}`;
+          if (areEventsExpanded) {
+            eventEl.classList.add('expanded'); // Apply expanded state if toggled on
+          }
+          
           eventEl.style.padding = '4px';
           eventEl.style.borderRadius = '3px';
           eventEl.style.fontSize = '8px';
@@ -512,6 +523,24 @@ document.addEventListener('DOMContentLoaded', function() {
           
           eventEl.appendChild(titleEl);
           eventEl.appendChild(timeEl);
+          
+          // If expanded, add details
+          if (areEventsExpanded) {
+            const detailsEl = document.createElement('div');
+            detailsEl.style.marginTop = '4px';
+            detailsEl.style.borderTop = '1px solid rgba(0,0,0,0.1)';
+            detailsEl.style.paddingTop = '4px';
+            detailsEl.style.fontSize = '7px';
+            
+            detailsEl.innerHTML = `
+              <div><strong>Event Details:</strong> ${event["Event Details"] || 'No details available'}</div>
+              <div><strong>Location:</strong> ${event.Location || 'TBD'}</div>
+              <div><strong>Event Type:</strong> ${event["Event Type"]}</div>
+            `;
+            
+            eventEl.appendChild(detailsEl);
+          }
+          
           eventsContainer.appendChild(eventEl);
         });
         

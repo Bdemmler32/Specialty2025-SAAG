@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let filteredEvents = [];
   let selectedDay = null;
   let lastUpdated = '';
+  let alertShown = null; // Variable to track the alert
   
   // Initialize
   fetchScheduleData();
@@ -327,7 +328,8 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // PDF Export functionality
   exportPdfBtn.addEventListener('click', function() {
-    alert("Generating PDF, please wait...");
+    // Show processing message
+    alertShown = alert("Generating PDF, please wait...");
     
     try {
       // Create a clone of the schedule to modify for PDF export
@@ -361,7 +363,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // Determine number of columns based on number of days
       const numDays = uniqueDays.length;
       
-      // Clear current schedule grid
+      // Clear current schedule grid and set to align at top
       const scheduleGridPdf = pdfContainer.querySelector('#scheduleGrid');
       if (scheduleGridPdf) {
         scheduleGridPdf.innerHTML = '';
@@ -369,6 +371,15 @@ document.addEventListener('DOMContentLoaded', function() {
         scheduleGridPdf.style.gridTemplateColumns = `repeat(${numDays}, 1fr)`;
         scheduleGridPdf.style.gap = '5px';
         scheduleGridPdf.style.marginTop = '10px';
+        scheduleGridPdf.style.alignItems = 'start'; // Align items to top
+      }
+      
+      // Replace the header image with the PDF-specific one
+      const headerImage = pdfContainer.querySelector('.header-image img');
+      if (headerImage) {
+        headerImage.src = 'SpecialtyWebheader-ExportPDF.jpg';
+        headerImage.style.width = '100%';
+        headerImage.style.height = 'auto';
       }
       
       // Group events by day
@@ -388,6 +399,7 @@ document.addEventListener('DOMContentLoaded', function() {
         dayColumn.style.overflow = 'hidden';
         dayColumn.style.display = 'flex';
         dayColumn.style.flexDirection = 'column';
+        dayColumn.style.alignItems = 'stretch'; // Make columns stretch
         
         // Create day header
         const dayHeader = document.createElement('div');
@@ -636,8 +648,9 @@ document.addEventListener('DOMContentLoaded', function() {
           const imgData = canvas.toDataURL('image/png', 1.0); // Use PNG for best text clarity
           pdf.addImage(imgData, 'PNG', offsetX, offsetY, finalWidth, finalHeight, undefined, 'FAST');
           
-          // Save the PDF
+          // Save the PDF - which also triggers the download dialog
           pdf.save('schedule-at-a-glance.pdf');
+          
         } catch (innerError) {
           console.error("Error in PDF generation:", innerError);
           alert("Error creating PDF: " + innerError.message);

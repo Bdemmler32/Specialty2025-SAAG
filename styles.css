@@ -13,9 +13,19 @@ body {
 }
 
 .container {
-  max-width: 800px;
+  width: 875px;
   margin: 0 auto;
   padding: 20px 15px;
+}
+
+.header-image {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.header-image img {
+  max-width: 100%;
+  height: auto;
 }
 
 .header {
@@ -131,6 +141,17 @@ h1 {
   border: 1px solid #ccc;
   border-right-width: 10px;
   border-right-color: #4a7aff;
+}
+
+.italic-legend {
+  display: flex;
+  align-items: center;
+}
+
+.italic-indicator {
+  margin-right: 6px;
+  font-style: italic;
+  font-weight: bold;
 }
 
 /* Expand/Collapse Slider */
@@ -271,6 +292,10 @@ input:checked + .slider:before {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.italic-title .event-title span {
+  font-style: italic;
 }
 
 .event-time {

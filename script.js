@@ -342,15 +342,7 @@ document.addEventListener('DOMContentLoaded', function() {
     filtersContainer.innerHTML = '';
     filtersContainer.style.display = 'none';
     
-    // Clear current schedule grid
-    const scheduleGridPdf = pdfContainer.querySelector('#scheduleGrid');
-    scheduleGridPdf.innerHTML = '';
-    scheduleGridPdf.style.display = 'grid';
-    scheduleGridPdf.style.gridTemplateColumns = 'repeat(7, 1fr)';
-    scheduleGridPdf.style.gap = '5px';
-    scheduleGridPdf.style.marginTop = '10px';
-    
-    // Create columns for each day of the week
+    // Get all unique days from the events
     const uniqueDays = [...new Set(events.map(event => event.Date))];
     
     // Sort uniqueDays chronologically
@@ -359,6 +351,32 @@ document.addEventListener('DOMContentLoaded', function() {
       const dateB = new Date(b.split(',')[1] + ',' + b.split(',')[0]);
       return dateA - dateB;
     });
+    
+    // Determine number of columns based on number of days
+    const numDays = uniqueDays.length;
+    
+    // Clear current schedule grid
+    const scheduleGridPdf = pdfContainer.querySelector('#scheduleGrid');
+    scheduleGridPdf.innerHTML = '';
+    scheduleGridPdf.style.display = 'grid';
+    scheduleGridPdf.style.gridTemplateColumns = `repeat(${numDays}, 1fr)`;
+    scheduleGridPdf.style.gap = '5px';
+    scheduleGridPdf.style.marginTop = '10px';
+    
+    // Add PDF header image
+    const pdfHeader = document.createElement('div');
+    pdfHeader.style.width = '100%';
+    pdfHeader.style.marginBottom = '15px';
+    pdfHeader.style.textAlign = 'center';
+    
+    const pdfHeaderImg = document.createElement('img');
+    pdfHeaderImg.src = 'SpecialtyWebheader-ExportPDF.jpg';
+    pdfHeaderImg.style.width = '100%';
+    pdfHeaderImg.style.maxWidth = '3150px';
+    pdfHeaderImg.style.height = 'auto';
+    
+    pdfHeader.appendChild(pdfHeaderImg);
+    pdfContainer.insertBefore(pdfHeader, pdfContainer.firstChild);
     
     // Group events by day
     const eventsByDay = {};
@@ -424,6 +442,8 @@ document.addEventListener('DOMContentLoaded', function() {
       dayEvents.forEach(event => {
         const timeCategory = getTimeCategory(event["Time Start"]);
         const isTicketed = event["Event Type"] === "Ticketed";
+        const isNetworking = event["Event Type"] === "Networking";
+        const isSetup = event["Event Type"] === "Setup";
         
         const eventEl = document.createElement('div');
         eventEl.className = `event-pdf ${timeCategory}`;
@@ -471,6 +491,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const titleEl = document.createElement('div');
         titleEl.style.fontWeight = 'bold';
         titleEl.style.marginBottom = '2px';
+        
+        // Apply italic style for Networking and Setup events
+        if (isNetworking || isSetup) {
+          titleEl.style.fontStyle = 'italic';
+        }
+        
         titleEl.textContent = event.Event;
         
         // Event time
@@ -503,6 +529,132 @@ document.addEventListener('DOMContentLoaded', function() {
     const morningColor = document.createElement('span');
     morningColor.style.width = '10px';
     morningColor.style.height = '10px';
+    morningColor.style.backgroundColor = '#e6f4ff';
+    morningColor.style.border = '1px solid #b3d7ff';
+    morningColor.style.display = 'inline-block';
+    morningColor.style.marginRight = '3px';
+    morningLegend.appendChild(morningColor);
+    morningLegend.appendChild(document.createTextNode('Morning'));
+    
+    // Afternoon legend
+    const afternoonLegend = document.createElement('div');
+    afternoonLegend.style.display = 'flex';
+    afternoonLegend.style.alignItems = 'center';
+    const afternoonColor = document.createElement('span');
+    afternoonColor.style.width = '10px';
+    afternoonColor.style.height = '10px';
+    afternoonColor.style.backgroundColor = '#ffede6';
+    afternoonColor.style.border = '1px solid #ffcbb3';
+    afternoonColor.style.display = 'inline-block';
+    afternoonColor.style.marginRight = '3px';
+    afternoonLegend.appendChild(afternoonColor);
+    afternoonLegend.appendChild(document.createTextNode('Afternoon'));
+    
+    // Evening legend
+    const eveningLegend = document.createElement('div');
+    eveningLegend.style.display = 'flex';
+    eveningLegend.style.alignItems = 'center';
+    const eveningColor = document.createElement('span');
+    eveningColor.style.width = '10px';
+    eveningColor.style.height = '10px';
+    eveningColor.style.backgroundColor = '#f0e6ff';
+    eveningColor.style.border = '1px solid #d6b3ff';
+    eveningColor.style.display = 'inline-block';
+    eveningColor.style.marginRight = '3px';
+    eveningLegend.appendChild(eveningColor);
+    eveningLegend.appendChild(document.createTextNode('Evening'));
+    
+    // Ticketed legend
+    const ticketedLegend = document.createElement('div');
+    ticketedLegend.style.display = 'flex';
+    ticketedLegend.style.alignItems = 'center';
+    const ticketedColor = document.createElement('span');
+    ticketedColor.style.width = '10px';
+    ticketedColor.style.height = '10px';
+    ticketedColor.style.border = '1px solid #ccc';
+    ticketedColor.style.borderRightWidth = '6px';
+    ticketedColor.style.borderRightColor = '#4a7aff';
+    ticketedColor.style.display = 'inline-block';
+    ticketedColor.style.marginRight = '3px';
+    ticketedLegend.appendChild(ticketedColor);
+    ticketedLegend.appendChild(document.createTextNode('Ticketed Event'));
+    
+    // Networking/Setup legend (italic)
+    const italicLegend = document.createElement('div');
+    italicLegend.style.display = 'flex';
+    italicLegend.style.alignItems = 'center';
+    const italicText = document.createElement('span');
+    italicText.textContent = 'Abc';
+    italicText.style.fontStyle = 'italic';
+    italicText.style.marginRight = '3px';
+    italicLegend.appendChild(italicText);
+    italicLegend.appendChild(document.createTextNode('Networking/Setup'));
+    
+    // Add legends to row
+    legendRow.appendChild(morningLegend);
+    legendRow.appendChild(afternoonLegend);
+    legendRow.appendChild(eveningLegend);
+    legendRow.appendChild(ticketedLegend);
+    
+    // Add legend row to container
+    pdfContainer.appendChild(legendRow);
+    
+    // Temporarily add the cloned container to the document for rendering
+    pdfContainer.style.position = 'absolute';
+    pdfContainer.style.left = '-9999px';
+    document.body.appendChild(pdfContainer);
+    
+    // Use html2canvas to capture the container
+    html2canvas(pdfContainer, {
+      scale: 2.5, // Higher scale for better text clarity
+      useCORS: true,
+      logging: false,
+      width: 1100,
+      imageTimeout: 0,
+      backgroundColor: '#ffffff',
+      letterRendering: true, // Improve text rendering
+      allowTaint: true,
+      useCORS: true
+    }).then(canvas => {
+      // Remove the temporary container
+      document.body.removeChild(pdfContainer);
+      
+      // Create PDF in landscape orientation (11x8.5 inches)
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'in',
+        format: 'letter',
+        compress: true // Enable compression to reduce file size
+      });
+      
+      // Calculate the scaling ratio to fit the canvas to the PDF
+      const imgWidth = 11 - 0.4; // Landscape letter width minus margins
+      const imgHeight = 8.5 - 0.4; // Landscape letter height minus margins
+      const canvasRatio = canvas.height / canvas.width;
+      const pdfRatio = imgHeight / imgWidth;
+      
+      let finalWidth = imgWidth;
+      let finalHeight = imgWidth * canvasRatio;
+      
+      // Adjust if the image is too tall
+      if (finalHeight > imgHeight) {
+        finalHeight = imgHeight;
+        finalWidth = imgHeight / canvasRatio;
+      }
+      
+      // Center the image on the page
+      const offsetX = (11 - finalWidth) / 2;
+      const offsetY = (8.5 - finalHeight) / 2;
+      
+      // Add the image to the PDF with quality settings
+      const imgData = canvas.toDataURL('image/png', 1.0); // Use PNG for best text clarity
+      pdf.addImage(imgData, 'PNG', offsetX, offsetY, finalWidth, finalHeight, undefined, 'FAST');
+      
+      // Save the PDF
+      pdf.save('schedule-at-a-glance.pdf');
+    });
+  });px';
     morningColor.style.backgroundColor = '#e6f4ff';
     morningColor.style.border = '1px solid #b3d7ff';
     morningColor.style.display = 'inline-block';

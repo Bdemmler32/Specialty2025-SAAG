@@ -327,297 +327,267 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // PDF Export functionality
   exportPdfBtn.addEventListener('click', function() {
-    // Show loading message
     alert("Generating PDF, please wait...");
     
-    // Create a clone of the schedule to modify for PDF export
-    const originalContainer = document.getElementById('schedule-container');
-    const pdfContainer = originalContainer.cloneNode(true);
-    
-    // Set the container to a fixed width for PDF export
-    pdfContainer.style.width = '1100px';
-    pdfContainer.style.maxWidth = 'none';
-    pdfContainer.style.margin = '0';
-    pdfContainer.style.padding = '10px';
-    pdfContainer.style.backgroundColor = 'white';
-    
-    // Remove filters container (keep only the header)
-    const filtersContainer = pdfContainer.querySelector('.filters-container');
-    if (filtersContainer) {
-      filtersContainer.innerHTML = '';
-      filtersContainer.style.display = 'none';
-    }
-    
-    // Get all unique days from the events
-    const uniqueDays = [...new Set(events.map(event => event.Date))];
-    
-    // Sort uniqueDays chronologically
-    uniqueDays.sort((a, b) => {
-      const dateA = new Date(a.split(',')[1] + ',' + a.split(',')[0]);
-      const dateB = new Date(b.split(',')[1] + ',' + b.split(',')[0]);
-      return dateA - dateB;
-    });
-    
-    // Determine number of columns based on number of days
-    const numDays = uniqueDays.length;
-    
-    // Clear current schedule grid
-    const scheduleGridPdf = pdfContainer.querySelector('#scheduleGrid');
-    if (scheduleGridPdf) {
-      scheduleGridPdf.innerHTML = '';
-      scheduleGridPdf.style.display = 'grid';
-      scheduleGridPdf.style.gridTemplateColumns = `repeat(${numDays}, 1fr)`;
-      scheduleGridPdf.style.gap = '5px';
-      scheduleGridPdf.style.marginTop = '10px';
-    }
-    
-    // Add PDF header image
-    const pdfHeader = document.createElement('div');
-    pdfHeader.style.width = '100%';
-    pdfHeader.style.marginBottom = '15px';
-    pdfHeader.style.textAlign = 'center';
-    pdfHeader.style.borderRadius = '8px';
-    pdfHeader.style.overflow = 'hidden';
-    pdfHeader.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
-    
-    const headerImg = document.createElement('img');
-    headerImg.src = 'SpecialtyWebheader-ExportPDF.jpg';
-    headerImg.style.width = '100%';
-    headerImg.style.maxWidth = '3150px';
-    headerImg.style.height = 'auto';
-    headerImg.style.display = 'block';
-    
-    pdfHeader.appendChild(headerImg);
-    pdfContainer.insertBefore(pdfHeader, pdfContainer.firstChild);Header.style.marginBottom = '15px';
-    pdfHeader.style.textAlign = 'center';
-    
-    const pdfHeaderImg = document.createElement('img');
-    pdfHeaderImg.src = 'SpecialtyWebheader-ExportPDF.jpg';
-    pdfHeaderImg.style.width = '100%';
-    pdfHeaderImg.style.maxWidth = '3150px';
-    pdfHeaderImg.style.height = 'auto';
-    
-    pdfHeader.appendChild(pdfHeaderImg);
-    pdfContainer.insertBefore(pdfHeader, pdfContainer.firstChild);
-    
-    // Group events by day
-    const eventsByDay = {};
-    uniqueDays.forEach(day => {
-      eventsByDay[day] = events.filter(event => event.Date === day);
-    });
-    
-    // Create a column for each day
-    uniqueDays.forEach(day => {
-      const dayEvents = eventsByDay[day];
-      
-      // Create day column
-      const dayColumn = document.createElement('div');
-      dayColumn.className = 'day-column';
-      dayColumn.style.width = '100%';
-      dayColumn.style.overflow = 'hidden';
-      dayColumn.style.display = 'flex';
-      dayColumn.style.flexDirection = 'column';
-      
-      // Create day header
-      const dayHeader = document.createElement('div');
-      dayHeader.className = 'day-header';
-      
-      // Split the date parts
-      const dateParts = day.split(',');
-      const dayName = dateParts[0].trim(); // Day name like "Saturday"
-      const dateDetail = dateParts[1].trim(); // Date like "November 15"
-      
-      // Create header content with day and date on same line with comma
-      dayHeader.innerHTML = `${dayName}, ${dateDetail}`;
-      
-      dayHeader.style.backgroundColor = '#333';
-      dayHeader.style.color = 'white';
-      dayHeader.style.padding = '8px 4px';
-      dayHeader.style.textAlign = 'center';
-      dayHeader.style.borderRadius = '5px 5px 0 0';
-      dayHeader.style.fontWeight = 'bold';
-      dayHeader.style.fontSize = '11px';
-      dayHeader.style.height = '32px';
-      dayHeader.style.display = 'flex';
-      dayHeader.style.alignItems = 'center';
-      dayHeader.style.justifyContent = 'center';
-      
-      dayColumn.appendChild(dayHeader);
-      
-      // Create events container
-      const eventsContainer = document.createElement('div');
-      eventsContainer.className = 'day-events';
-      eventsContainer.style.backgroundColor = 'white';
-      eventsContainer.style.padding = '4px';
-      eventsContainer.style.borderRadius = '0 0 5px 5px';
-      eventsContainer.style.flexGrow = '1';
-      eventsContainer.style.display = 'flex';
-      eventsContainer.style.flexDirection = 'column';
-      eventsContainer.style.gap = '3px';
-      
-      // Sort events by time
-      dayEvents.sort((a, b) => {
-        return timeToMinutes(a["Time Start"]) - timeToMinutes(b["Time Start"]);
-      });
-      
-      // Add events to container
-      dayEvents.forEach(event => {
-        const timeCategory = getTimeCategory(event["Time Start"]);
-        const isTicketed = event["Event Type"] === "Ticketed";
-        const isNetworking = event["Event Type"] === "Networking";
-        const isSetup = event["Event Type"] === "Setup";
-        
-        const eventEl = document.createElement('div');
-        eventEl.className = `event-pdf ${timeCategory}`;
-        eventEl.style.padding = '4px';
-        eventEl.style.borderRadius = '3px';
-        eventEl.style.fontSize = '8px';
-        eventEl.style.position = 'relative';
-        eventEl.style.marginBottom = '2px';
-        eventEl.style.lineHeight = '1.2';
-        
-        // Set background color based on time category
-        if (timeCategory === 'morning') {
-          eventEl.style.backgroundColor = '#e6f4ff';
-          eventEl.style.border = '1px solid #b3d7ff';
-        } else if (timeCategory === 'afternoon') {
-          eventEl.style.backgroundColor = '#ffede6';
-          eventEl.style.border = '1px solid #ffcbb3';
-        } else {
-          eventEl.style.backgroundColor = '#f0e6ff';
-          eventEl.style.border = '1px solid #d6b3ff';
-        }
-        
-        // Add ticketed indicator if needed
-        if (isTicketed) {
-          // Create a dedicated indicator div instead of using border
-          const indicator = document.createElement('div');
-          indicator.style.position = 'absolute';
-          indicator.style.right = '0';
-          indicator.style.top = '0';
-          indicator.style.bottom = '0';
-          indicator.style.width = '6px';
-          indicator.style.backgroundColor = '#4a7aff';
-          indicator.style.borderTopRightRadius = '3px';
-          indicator.style.borderBottomRightRadius = '3px';
-          
-          // Ensure the event has proper positioning
-          eventEl.style.position = 'relative';
-          eventEl.style.paddingRight = '8px';
-          
-          // Add the indicator to the event
-          eventEl.appendChild(indicator);
-        }
-        
-        // Event title
-        const titleEl = document.createElement('div');
-        titleEl.style.fontWeight = 'bold';
-        titleEl.style.marginBottom = '2px';
-        
-        // Apply italic style for Networking and Setup events
-        if (isNetworking || isSetup) {
-          titleEl.style.fontStyle = 'italic';
-        }
-        
-        titleEl.textContent = event.Event;
-        
-        // Event time
-        const timeEl = document.createElement('div');
-        timeEl.style.fontSize = '8px';
-        timeEl.style.color = '#444';
-        timeEl.textContent = `${event["Time Start"]} - ${event["Time End"]}`;
-        
-        eventEl.appendChild(titleEl);
-        eventEl.appendChild(timeEl);
-        eventsContainer.appendChild(eventEl);
-      });
-      
-      dayColumn.appendChild(eventsContainer);
-      if (scheduleGridPdf) {
-        scheduleGridPdf.appendChild(dayColumn);
-      }
-    });
-    
-    // Add explanatory legend at the bottom if there's space
-    const legendRow = document.createElement('div');
-    legendRow.style.display = 'flex';
-    legendRow.style.justifyContent = 'center';
-    legendRow.style.gap = '15px';
-    legendRow.style.marginTop = '8px';
-    legendRow.style.fontSize = '8px';
-    
-    // Morning legend
-    const morningLegend = document.createElement('div');
-    morningLegend.style.display = 'flex';
-    morningLegend.style.alignItems = 'center';
-    const morningColor = document.createElement('span');
-    morningColor.style.width = '10px';
-    morningColor.style.height = '10px';
-    morningColor.style.backgroundColor = '#e6f4ff';
-    morningColor.style.border = '1px solid #b3d7ff';
-    morningColor.style.display = 'inline-block';
-    morningColor.style.marginRight = '3px';
-    morningLegend.appendChild(morningColor);
-    morningLegend.appendChild(document.createTextNode('Morning'));
-    
-    // Afternoon legend
-    const afternoonLegend = document.createElement('div');
-    afternoonLegend.style.display = 'flex';
-    afternoonLegend.style.alignItems = 'center';
-    const afternoonColor = document.createElement('span');
-    afternoonColor.style.width = '10px';
-    afternoonColor.style.height = '10px';
-    afternoonColor.style.backgroundColor = '#ffede6';
-    afternoonColor.style.border = '1px solid #ffcbb3';
-    afternoonColor.style.display = 'inline-block';
-    afternoonColor.style.marginRight = '3px';
-    afternoonLegend.appendChild(afternoonColor);
-    afternoonLegend.appendChild(document.createTextNode('Afternoon'));
-    
-    // Evening legend
-    const eveningLegend = document.createElement('div');
-    eveningLegend.style.display = 'flex';
-    eveningLegend.style.alignItems = 'center';
-    const eveningColor = document.createElement('span');
-    eveningColor.style.width = '10px';
-    eveningColor.style.height = '10px';
-    eveningColor.style.backgroundColor = '#f0e6ff';
-    eveningColor.style.border = '1px solid #d6b3ff';
-    eveningColor.style.display = 'inline-block';
-    eveningColor.style.marginRight = '3px';
-    eveningLegend.appendChild(eveningColor);
-    eveningLegend.appendChild(document.createTextNode('Evening'));
-    
-    // Ticketed legend
-    const ticketedLegend = document.createElement('div');
-    ticketedLegend.style.display = 'flex';
-    ticketedLegend.style.alignItems = 'center';
-    const ticketedColor = document.createElement('span');
-    ticketedColor.style.width = '10px';
-    ticketedColor.style.height = '10px';
-    ticketedColor.style.border = '1px solid #ccc';
-    ticketedColor.style.borderRightWidth = '6px';
-    ticketedColor.style.borderRightColor = '#4a7aff';
-    ticketedColor.style.display = 'inline-block';
-    ticketedColor.style.marginRight = '3px';
-    ticketedLegend.appendChild(ticketedColor);
-    ticketedLegend.appendChild(document.createTextNode('Ticketed Event'));
-    
-    // Add legends to row
-    legendRow.appendChild(morningLegend);
-    legendRow.appendChild(afternoonLegend);
-    legendRow.appendChild(eveningLegend);
-    legendRow.appendChild(ticketedLegend);
-    
-    // Add legend row to container
-    pdfContainer.appendChild(legendRow);
-    
-    // Temporarily add the cloned container to the document for rendering
-    pdfContainer.style.position = 'absolute';
-    pdfContainer.style.left = '-9999px';
-    document.body.appendChild(pdfContainer);
-    
     try {
+      // Create a clone of the schedule to modify for PDF export
+      const originalContainer = document.getElementById('schedule-container');
+      const pdfContainer = originalContainer.cloneNode(true);
+      
+      // Set the container to a fixed width for PDF export
+      pdfContainer.style.width = '1100px';
+      pdfContainer.style.maxWidth = 'none';
+      pdfContainer.style.margin = '0';
+      pdfContainer.style.padding = '10px';
+      pdfContainer.style.backgroundColor = 'white';
+      
+      // Remove filters container (keep only the header)
+      const filtersContainer = pdfContainer.querySelector('.filters-container');
+      if (filtersContainer) {
+        filtersContainer.innerHTML = '';
+        filtersContainer.style.display = 'none';
+      }
+      
+      // Get all unique days from the events
+      const uniqueDays = [...new Set(events.map(event => event.Date))];
+      
+      // Sort uniqueDays chronologically
+      uniqueDays.sort((a, b) => {
+        const dateA = new Date(a.split(',')[1] + ',' + a.split(',')[0]);
+        const dateB = new Date(b.split(',')[1] + ',' + b.split(',')[0]);
+        return dateA - dateB;
+      });
+      
+      // Determine number of columns based on number of days
+      const numDays = uniqueDays.length;
+      
+      // Clear current schedule grid
+      const scheduleGridPdf = pdfContainer.querySelector('#scheduleGrid');
+      if (scheduleGridPdf) {
+        scheduleGridPdf.innerHTML = '';
+        scheduleGridPdf.style.display = 'grid';
+        scheduleGridPdf.style.gridTemplateColumns = `repeat(${numDays}, 1fr)`;
+        scheduleGridPdf.style.gap = '5px';
+        scheduleGridPdf.style.marginTop = '10px';
+      }
+      
+      // Group events by day
+      const eventsByDay = {};
+      uniqueDays.forEach(day => {
+        eventsByDay[day] = events.filter(event => event.Date === day);
+      });
+      
+      // Create a column for each day
+      uniqueDays.forEach(day => {
+        const dayEvents = eventsByDay[day];
+        
+        // Create day column
+        const dayColumn = document.createElement('div');
+        dayColumn.className = 'day-column';
+        dayColumn.style.width = '100%';
+        dayColumn.style.overflow = 'hidden';
+        dayColumn.style.display = 'flex';
+        dayColumn.style.flexDirection = 'column';
+        
+        // Create day header
+        const dayHeader = document.createElement('div');
+        dayHeader.className = 'day-header';
+        
+        // Split the date parts
+        const dateParts = day.split(',');
+        const dayName = dateParts[0].trim(); // Day name like "Saturday"
+        const dateDetail = dateParts[1].trim(); // Date like "November 15"
+        
+        // Create header content with day and date on same line with comma
+        dayHeader.innerHTML = `${dayName}, ${dateDetail}`;
+        
+        dayHeader.style.backgroundColor = '#333';
+        dayHeader.style.color = 'white';
+        dayHeader.style.padding = '8px 4px';
+        dayHeader.style.textAlign = 'center';
+        dayHeader.style.borderRadius = '5px 5px 0 0';
+        dayHeader.style.fontWeight = 'bold';
+        dayHeader.style.fontSize = '11px';
+        dayHeader.style.height = '32px';
+        dayHeader.style.display = 'flex';
+        dayHeader.style.alignItems = 'center';
+        dayHeader.style.justifyContent = 'center';
+        
+        dayColumn.appendChild(dayHeader);
+        
+        // Create events container
+        const eventsContainer = document.createElement('div');
+        eventsContainer.className = 'day-events';
+        eventsContainer.style.backgroundColor = 'white';
+        eventsContainer.style.padding = '4px';
+        eventsContainer.style.borderRadius = '0 0 5px 5px';
+        eventsContainer.style.flexGrow = '1';
+        eventsContainer.style.display = 'flex';
+        eventsContainer.style.flexDirection = 'column';
+        eventsContainer.style.gap = '3px';
+        
+        // Sort events by time
+        dayEvents.sort((a, b) => {
+          return timeToMinutes(a["Time Start"]) - timeToMinutes(b["Time Start"]);
+        });
+        
+        // Add events to container
+        dayEvents.forEach(event => {
+          const timeCategory = getTimeCategory(event["Time Start"]);
+          const isTicketed = event["Event Type"] === "Ticketed";
+          const isNetworking = event["Event Type"] === "Networking";
+          const isSetup = event["Event Type"] === "Setup";
+          
+          const eventEl = document.createElement('div');
+          eventEl.className = `event-pdf ${timeCategory}`;
+          eventEl.style.padding = '4px';
+          eventEl.style.borderRadius = '3px';
+          eventEl.style.fontSize = '8px';
+          eventEl.style.position = 'relative';
+          eventEl.style.marginBottom = '2px';
+          eventEl.style.lineHeight = '1.2';
+          
+          // Set background color based on time category
+          if (timeCategory === 'morning') {
+            eventEl.style.backgroundColor = '#e6f4ff';
+            eventEl.style.border = '1px solid #b3d7ff';
+          } else if (timeCategory === 'afternoon') {
+            eventEl.style.backgroundColor = '#ffede6';
+            eventEl.style.border = '1px solid #ffcbb3';
+          } else {
+            eventEl.style.backgroundColor = '#f0e6ff';
+            eventEl.style.border = '1px solid #d6b3ff';
+          }
+          
+          // Add ticketed indicator if needed
+          if (isTicketed) {
+            // Create a dedicated indicator div instead of using border
+            const indicator = document.createElement('div');
+            indicator.style.position = 'absolute';
+            indicator.style.right = '0';
+            indicator.style.top = '0';
+            indicator.style.bottom = '0';
+            indicator.style.width = '6px';
+            indicator.style.backgroundColor = '#4a7aff';
+            indicator.style.borderTopRightRadius = '3px';
+            indicator.style.borderBottomRightRadius = '3px';
+            
+            // Ensure the event has proper positioning
+            eventEl.style.position = 'relative';
+            eventEl.style.paddingRight = '8px';
+            
+            // Add the indicator to the event
+            eventEl.appendChild(indicator);
+          }
+          
+          // Event title
+          const titleEl = document.createElement('div');
+          titleEl.style.fontWeight = 'bold';
+          titleEl.style.marginBottom = '2px';
+          
+          // Apply italic style for Networking and Setup events
+          if (isNetworking || isSetup) {
+            titleEl.style.fontStyle = 'italic';
+          }
+          
+          titleEl.textContent = event.Event;
+          
+          // Event time
+          const timeEl = document.createElement('div');
+          timeEl.style.fontSize = '8px';
+          timeEl.style.color = '#444';
+          timeEl.textContent = `${event["Time Start"]} - ${event["Time End"]}`;
+          
+          eventEl.appendChild(titleEl);
+          eventEl.appendChild(timeEl);
+          eventsContainer.appendChild(eventEl);
+        });
+        
+        dayColumn.appendChild(eventsContainer);
+        if (scheduleGridPdf) {
+          scheduleGridPdf.appendChild(dayColumn);
+        }
+      });
+      
+      // Add explanatory legend at the bottom if there's space
+      const legendRow = document.createElement('div');
+      legendRow.style.display = 'flex';
+      legendRow.style.justifyContent = 'center';
+      legendRow.style.gap = '15px';
+      legendRow.style.marginTop = '8px';
+      legendRow.style.fontSize = '8px';
+      
+      // Morning legend
+      const morningLegend = document.createElement('div');
+      morningLegend.style.display = 'flex';
+      morningLegend.style.alignItems = 'center';
+      const morningColor = document.createElement('span');
+      morningColor.style.width = '10px';
+      morningColor.style.height = '10px';
+      morningColor.style.backgroundColor = '#e6f4ff';
+      morningColor.style.border = '1px solid #b3d7ff';
+      morningColor.style.display = 'inline-block';
+      morningColor.style.marginRight = '3px';
+      morningLegend.appendChild(morningColor);
+      morningLegend.appendChild(document.createTextNode('Morning'));
+      
+      // Afternoon legend
+      const afternoonLegend = document.createElement('div');
+      afternoonLegend.style.display = 'flex';
+      afternoonLegend.style.alignItems = 'center';
+      const afternoonColor = document.createElement('span');
+      afternoonColor.style.width = '10px';
+      afternoonColor.style.height = '10px';
+      afternoonColor.style.backgroundColor = '#ffede6';
+      afternoonColor.style.border = '1px solid #ffcbb3';
+      afternoonColor.style.display = 'inline-block';
+      afternoonColor.style.marginRight = '3px';
+      afternoonLegend.appendChild(afternoonColor);
+      afternoonLegend.appendChild(document.createTextNode('Afternoon'));
+      
+      // Evening legend
+      const eveningLegend = document.createElement('div');
+      eveningLegend.style.display = 'flex';
+      eveningLegend.style.alignItems = 'center';
+      const eveningColor = document.createElement('span');
+      eveningColor.style.width = '10px';
+      eveningColor.style.height = '10px';
+      eveningColor.style.backgroundColor = '#f0e6ff';
+      eveningColor.style.border = '1px solid #d6b3ff';
+      eveningColor.style.display = 'inline-block';
+      eveningColor.style.marginRight = '3px';
+      eveningLegend.appendChild(eveningColor);
+      eveningLegend.appendChild(document.createTextNode('Evening'));
+      
+      // Ticketed legend
+      const ticketedLegend = document.createElement('div');
+      ticketedLegend.style.display = 'flex';
+      ticketedLegend.style.alignItems = 'center';
+      const ticketedColor = document.createElement('span');
+      ticketedColor.style.width = '10px';
+      ticketedColor.style.height = '10px';
+      ticketedColor.style.border = '1px solid #ccc';
+      ticketedColor.style.borderRightWidth = '6px';
+      ticketedColor.style.borderRightColor = '#4a7aff';
+      ticketedColor.style.display = 'inline-block';
+      ticketedColor.style.marginRight = '3px';
+      ticketedLegend.appendChild(ticketedColor);
+      ticketedLegend.appendChild(document.createTextNode('Ticketed Event'));
+      
+      // Add legends to row
+      legendRow.appendChild(morningLegend);
+      legendRow.appendChild(afternoonLegend);
+      legendRow.appendChild(eveningLegend);
+      legendRow.appendChild(ticketedLegend);
+      
+      // Add legend row to container
+      pdfContainer.appendChild(legendRow);
+      
+      // Temporarily add the cloned container to the document for rendering
+      pdfContainer.style.position = 'absolute';
+      pdfContainer.style.left = '-9999px';
+      document.body.appendChild(pdfContainer);
+      
       // Use html2canvas to capture the container
       html2canvas(pdfContainer, {
         scale: 2.5, // Higher scale for better text clarity
@@ -629,7 +599,7 @@ document.addEventListener('DOMContentLoaded', function() {
         letterRendering: true, // Improve text rendering
         allowTaint: true,
         useCORS: true
-      }).then(canvas => {
+      }).then(function(canvas) {
         try {
           // Remove the temporary container
           document.body.removeChild(pdfContainer);
@@ -668,19 +638,24 @@ document.addEventListener('DOMContentLoaded', function() {
           
           // Save the PDF
           pdf.save('schedule-at-a-glance.pdf');
-        } catch (error) {
-          console.error("Error in PDF generation:", error);
-          alert("Error creating PDF: " + error.message);
+        } catch (innerError) {
+          console.error("Error in PDF generation:", innerError);
+          alert("Error creating PDF: " + innerError.message);
+          if (document.body.contains(pdfContainer)) {
+            document.body.removeChild(pdfContainer);
+          }
         }
-      }).catch(error => {
-        console.error("Error in html2canvas:", error);
-        alert("Error capturing page: " + error.message);
+      }).catch(function(canvasError) {
+        console.error("Error in html2canvas:", canvasError);
+        alert("Error capturing page: " + canvasError.message);
+        if (document.body.contains(pdfContainer)) {
+          document.body.removeChild(pdfContainer);
+        }
       });
-    } catch (error) {
-      console.error("Error in PDF export:", error);
-      alert("Error starting PDF export: " + error.message);
+    } catch (outerError) {
+      console.error("Error in PDF export:", outerError);
+      alert("Error starting PDF export: " + outerError.message);
     }
-  });
   });
   
   // Get time category based on hour with new ranges

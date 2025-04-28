@@ -388,7 +388,7 @@ document.addEventListener('DOMContentLoaded', function() {
     headerImg.style.display = 'block';
     
     pdfHeader.appendChild(headerImg);
-    pdfContainer.insertBefore(pdfHeader, pdfContainer.firstChild);Header.style.marginBottom = '15px';
+    pdfContainer.insertBefore(pdfHeader, pdfContainer.firstChild);pdfHeader.style.marginBottom = '15px';
     pdfHeader.style.textAlign = 'center';
     
     const pdfHeaderImg = document.createElement('img');

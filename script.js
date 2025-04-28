@@ -327,6 +327,9 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // PDF Export functionality
   exportPdfBtn.addEventListener('click', function() {
+    // Show loading message
+    alert("Generating PDF, please wait...");
+    
     // Create a clone of the schedule to modify for PDF export
     const originalContainer = document.getElementById('schedule-container');
     const pdfContainer = originalContainer.cloneNode(true);
@@ -340,8 +343,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Remove filters container (keep only the header)
     const filtersContainer = pdfContainer.querySelector('.filters-container');
-    filtersContainer.innerHTML = '';
-    filtersContainer.style.display = 'none';
+    if (filtersContainer) {
+      filtersContainer.innerHTML = '';
+      filtersContainer.style.display = 'none';
+    }
     
     // Get all unique days from the events
     const uniqueDays = [...new Set(events.map(event => event.Date))];
@@ -358,11 +363,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Clear current schedule grid
     const scheduleGridPdf = pdfContainer.querySelector('#scheduleGrid');
-    scheduleGridPdf.innerHTML = '';
-    scheduleGridPdf.style.display = 'grid';
-    scheduleGridPdf.style.gridTemplateColumns = `repeat(${numDays}, 1fr)`;
-    scheduleGridPdf.style.gap = '5px';
-    scheduleGridPdf.style.marginTop = '10px';
+    if (scheduleGridPdf) {
+      scheduleGridPdf.innerHTML = '';
+      scheduleGridPdf.style.display = 'grid';
+      scheduleGridPdf.style.gridTemplateColumns = `repeat(${numDays}, 1fr)`;
+      scheduleGridPdf.style.gap = '5px';
+      scheduleGridPdf.style.marginTop = '10px';
+    }
     
     // Add PDF header image
     const pdfHeader = document.createElement('div');
@@ -526,7 +533,9 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       
       dayColumn.appendChild(eventsContainer);
-      scheduleGridPdf.appendChild(dayColumn);
+      if (scheduleGridPdf) {
+        scheduleGridPdf.appendChild(dayColumn);
+      }
     });
     
     // Add explanatory legend at the bottom if there's space
@@ -608,56 +617,70 @@ document.addEventListener('DOMContentLoaded', function() {
     pdfContainer.style.left = '-9999px';
     document.body.appendChild(pdfContainer);
     
-    // Use html2canvas to capture the container
-    html2canvas(pdfContainer, {
-      scale: 2.5, // Higher scale for better text clarity
-      useCORS: true,
-      logging: false,
-      width: 1100,
-      imageTimeout: 0,
-      backgroundColor: '#ffffff',
-      letterRendering: true, // Improve text rendering
-      allowTaint: true,
-      useCORS: true
-    }).then(canvas => {
-      // Remove the temporary container
-      document.body.removeChild(pdfContainer);
-      
-      // Create PDF in landscape orientation (11x8.5 inches)
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'in',
-        format: 'letter',
-        compress: true // Enable compression to reduce file size
+    try {
+      // Use html2canvas to capture the container
+      html2canvas(pdfContainer, {
+        scale: 2.5, // Higher scale for better text clarity
+        useCORS: true,
+        logging: false,
+        width: 1100,
+        imageTimeout: 0,
+        backgroundColor: '#ffffff',
+        letterRendering: true, // Improve text rendering
+        allowTaint: true,
+        useCORS: true
+      }).then(canvas => {
+        try {
+          // Remove the temporary container
+          document.body.removeChild(pdfContainer);
+          
+          // Create PDF in landscape orientation (11x8.5 inches)
+          const { jsPDF } = window.jspdf;
+          const pdf = new jsPDF({
+            orientation: 'landscape',
+            unit: 'in',
+            format: 'letter',
+            compress: true // Enable compression to reduce file size
+          });
+          
+          // Calculate the scaling ratio to fit the canvas to the PDF
+          const imgWidth = 11 - 0.4; // Landscape letter width minus margins
+          const imgHeight = 8.5 - 0.4; // Landscape letter height minus margins
+          const canvasRatio = canvas.height / canvas.width;
+          const pdfRatio = imgHeight / imgWidth;
+          
+          let finalWidth = imgWidth;
+          let finalHeight = imgWidth * canvasRatio;
+          
+          // Adjust if the image is too tall
+          if (finalHeight > imgHeight) {
+            finalHeight = imgHeight;
+            finalWidth = imgHeight / canvasRatio;
+          }
+          
+          // Center the image on the page
+          const offsetX = (11 - finalWidth) / 2;
+          const offsetY = (8.5 - finalHeight) / 2;
+          
+          // Add the image to the PDF with quality settings
+          const imgData = canvas.toDataURL('image/png', 1.0); // Use PNG for best text clarity
+          pdf.addImage(imgData, 'PNG', offsetX, offsetY, finalWidth, finalHeight, undefined, 'FAST');
+          
+          // Save the PDF
+          pdf.save('schedule-at-a-glance.pdf');
+        } catch (error) {
+          console.error("Error in PDF generation:", error);
+          alert("Error creating PDF: " + error.message);
+        }
+      }).catch(error => {
+        console.error("Error in html2canvas:", error);
+        alert("Error capturing page: " + error.message);
       });
-      
-      // Calculate the scaling ratio to fit the canvas to the PDF
-      const imgWidth = 11 - 0.4; // Landscape letter width minus margins
-      const imgHeight = 8.5 - 0.4; // Landscape letter height minus margins
-      const canvasRatio = canvas.height / canvas.width;
-      const pdfRatio = imgHeight / imgWidth;
-      
-      let finalWidth = imgWidth;
-      let finalHeight = imgWidth * canvasRatio;
-      
-      // Adjust if the image is too tall
-      if (finalHeight > imgHeight) {
-        finalHeight = imgHeight;
-        finalWidth = imgHeight / canvasRatio;
-      }
-      
-      // Center the image on the page
-      const offsetX = (11 - finalWidth) / 2;
-      const offsetY = (8.5 - finalHeight) / 2;
-      
-      // Add the image to the PDF with quality settings
-      const imgData = canvas.toDataURL('image/png', 1.0); // Use PNG for best text clarity
-      pdf.addImage(imgData, 'PNG', offsetX, offsetY, finalWidth, finalHeight, undefined, 'FAST');
-      
-      // Save the PDF
-      pdf.save('schedule-at-a-glance.pdf');
-    });
+    } catch (error) {
+      console.error("Error in PDF export:", error);
+      alert("Error starting PDF export: " + error.message);
+    }
+  });
   });
   
   // Get time category based on hour with new ranges

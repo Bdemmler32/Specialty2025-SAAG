@@ -325,7 +325,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  // PDF Export functionality
+  // PDF Export functionality with continuous flow layout
   exportPdfBtn.addEventListener('click', function() {
     try {
       // Create a clone of the schedule to modify for PDF export
@@ -346,32 +346,7 @@ document.addEventListener('DOMContentLoaded', function() {
         filtersContainer.style.display = 'none';
       }
       
-      // Get all unique days from the events
-      const uniqueDays = [...new Set(events.map(event => event.Date))];
-      
-      // Sort uniqueDays chronologically
-      uniqueDays.sort((a, b) => {
-        const dateA = new Date(a.split(',')[1] + ',' + a.split(',')[0]);
-        const dateB = new Date(b.split(',')[1] + ',' + b.split(',')[0]);
-        return dateA - dateB;
-      });
-      
-      // Determine number of columns based on number of days
-      const numDays = uniqueDays.length;
-      
-      // Clear current schedule grid and set to align at top
-      const scheduleGridPdf = pdfContainer.querySelector('#scheduleGrid');
-      if (scheduleGridPdf) {
-        scheduleGridPdf.innerHTML = '';
-        scheduleGridPdf.style.display = 'grid';
-        scheduleGridPdf.style.gridTemplateColumns = `repeat(${numDays}, 1fr)`;
-        scheduleGridPdf.style.gap = '5px';
-        scheduleGridPdf.style.marginTop = '10px';
-        scheduleGridPdf.style.alignItems = 'start'; // Align items to top
-      }
-      
       // Replace the header image with the PDF-specific one
-      // Create a new header image for the PDF
       const headerImageContainer = pdfContainer.querySelector('.header-image');
       if (headerImageContainer) {
         // Create a new image element to avoid any caching issues
@@ -389,69 +364,107 @@ document.addEventListener('DOMContentLoaded', function() {
       // Check if the events are currently expanded or collapsed
       const areEventsExpanded = expandCollapseToggle.checked;
       
-      // Group events by day
-      const eventsByDay = {};
-      uniqueDays.forEach(day => {
-        eventsByDay[day] = events.filter(event => event.Date === day);
+      // Get all unique days from the events
+      const uniqueDays = [...new Set(events.map(event => event.Date))];
+      
+      // Sort uniqueDays chronologically
+      uniqueDays.sort((a, b) => {
+        const dateA = new Date(a.split(',')[1] + ',' + a.split(',')[0]);
+        const dateB = new Date(b.split(',')[1] + ',' + b.split(',')[0]);
+        return dateA - dateB;
       });
       
-      // Create a column for each day
+      // Create a continuous flow of all events
+      let allSortedEvents = [];
       uniqueDays.forEach(day => {
-        const dayEvents = eventsByDay[day];
+        const dayEvents = events.filter(event => event.Date === day);
         
-        // Create day column
-        const dayColumn = document.createElement('div');
-        dayColumn.className = 'day-column';
-        dayColumn.style.width = '100%';
-        dayColumn.style.overflow = 'hidden';
-        dayColumn.style.display = 'flex';
-        dayColumn.style.flexDirection = 'column';
-        dayColumn.style.alignItems = 'stretch'; // Make columns stretch
-        
-        // Create day header
-        const dayHeader = document.createElement('div');
-        dayHeader.className = 'day-header';
-        
-        // Split the date parts
-        const dateParts = day.split(',');
-        const dayName = dateParts[0].trim(); // Day name like "Saturday"
-        const dateDetail = dateParts[1].trim(); // Date like "November 15"
-        
-        // Create header content with day and date on same line with comma
-        dayHeader.innerHTML = `${dayName}, ${dateDetail}`;
-        
-        dayHeader.style.backgroundColor = '#333';
-        dayHeader.style.color = 'white';
-        dayHeader.style.padding = '8px 4px';
-        dayHeader.style.textAlign = 'center';
-        dayHeader.style.borderRadius = '5px 5px 0 0';
-        dayHeader.style.fontWeight = 'bold';
-        dayHeader.style.fontSize = '11px';
-        dayHeader.style.height = '32px';
-        dayHeader.style.display = 'flex';
-        dayHeader.style.alignItems = 'center';
-        dayHeader.style.justifyContent = 'center';
-        
-        dayColumn.appendChild(dayHeader);
-        
-        // Create events container
-        const eventsContainer = document.createElement('div');
-        eventsContainer.className = 'day-events';
-        eventsContainer.style.backgroundColor = 'white';
-        eventsContainer.style.padding = '4px';
-        eventsContainer.style.borderRadius = '0 0 5px 5px';
-        eventsContainer.style.flexGrow = '1';
-        eventsContainer.style.display = 'flex';
-        eventsContainer.style.flexDirection = 'column';
-        eventsContainer.style.gap = '3px';
-        
-        // Sort events by time
+        // Sort events for each day by time
         dayEvents.sort((a, b) => {
           return timeToMinutes(a["Time Start"]) - timeToMinutes(b["Time Start"]);
         });
         
-        // Add events to container
-        dayEvents.forEach(event => {
+        // Add a day header "event" to visually separate days
+        allSortedEvents.push({
+          isHeader: true,
+          day: day
+        });
+        
+        // Add all the day's events
+        allSortedEvents = allSortedEvents.concat(dayEvents);
+      });
+      
+      // Determine optimal number of columns (3-6 depending on number of events)
+      let numColumns = 3; // Minimum columns
+      const totalEventCount = allSortedEvents.length;
+      
+      if (totalEventCount > 60) numColumns = 6;
+      else if (totalEventCount > 45) numColumns = 5;
+      else if (totalEventCount > 30) numColumns = 4;
+      
+      // Clear current schedule grid and set to flex layout
+      const scheduleGridPdf = pdfContainer.querySelector('#scheduleGrid');
+      if (scheduleGridPdf) {
+        scheduleGridPdf.innerHTML = '';
+        scheduleGridPdf.style.display = 'grid';
+        scheduleGridPdf.style.gridTemplateColumns = `repeat(${numColumns}, 1fr)`;
+        scheduleGridPdf.style.gap = '5px';
+        scheduleGridPdf.style.marginTop = '10px';
+        scheduleGridPdf.style.alignItems = 'start'; // Align items to top
+      }
+      
+      // Create columns for the continuous flow
+      const columns = [];
+      for (let i = 0; i < numColumns; i++) {
+        const column = document.createElement('div');
+        column.className = 'flow-column';
+        column.style.display = 'flex';
+        column.style.flexDirection = 'column';
+        column.style.gap = '5px';
+        column.style.width = '100%';
+        
+        columns.push(column);
+        if (scheduleGridPdf) {
+          scheduleGridPdf.appendChild(column);
+        }
+      }
+      
+      // Distribute events among columns evenly
+      const eventsPerColumn = Math.ceil(allSortedEvents.length / numColumns);
+      let currentColumnIndex = 0;
+      let eventsInCurrentColumn = 0;
+      
+      allSortedEvents.forEach(event => {
+        // Check if we need to move to the next column
+        if (eventsInCurrentColumn >= eventsPerColumn && currentColumnIndex < numColumns - 1) {
+          currentColumnIndex++;
+          eventsInCurrentColumn = 0;
+        }
+        
+        const currentColumn = columns[currentColumnIndex];
+        
+        if (event.isHeader) {
+          // Create day header
+          const dayHeader = document.createElement('div');
+          dayHeader.className = 'day-header';
+          dayHeader.textContent = event.day;
+          dayHeader.style.backgroundColor = '#333';
+          dayHeader.style.color = 'white';
+          dayHeader.style.padding = '8px 4px';
+          dayHeader.style.textAlign = 'center';
+          dayHeader.style.borderRadius = '5px 5px 0 0';
+          dayHeader.style.fontWeight = 'bold';
+          dayHeader.style.fontSize = '11px';
+          dayHeader.style.height = '32px';
+          dayHeader.style.display = 'flex';
+          dayHeader.style.alignItems = 'center';
+          dayHeader.style.justifyContent = 'center';
+          dayHeader.style.marginBottom = '5px';
+          dayHeader.style.width = '100%';
+          
+          currentColumn.appendChild(dayHeader);
+        } else {
+          // Create event element
           const timeCategory = getTimeCategory(event["Time Start"]);
           const isTicketed = event["Event Type"] === "Ticketed";
           const isNetworking = event["Event Type"] === "Networking";
@@ -541,16 +554,13 @@ document.addEventListener('DOMContentLoaded', function() {
             eventEl.appendChild(detailsEl);
           }
           
-          eventsContainer.appendChild(eventEl);
-        });
-        
-        dayColumn.appendChild(eventsContainer);
-        if (scheduleGridPdf) {
-          scheduleGridPdf.appendChild(dayColumn);
+          currentColumn.appendChild(eventEl);
         }
+        
+        eventsInCurrentColumn++;
       });
       
-      // Add explanatory legend at the bottom if there's space
+      // Add explanatory legend at the bottom
       const legendRow = document.createElement('div');
       legendRow.style.display = 'flex';
       legendRow.style.justifyContent = 'center';

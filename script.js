@@ -658,7 +658,6 @@ document.addEventListener('DOMContentLoaded', function() {
           const imgWidth = 11 - 0.4; // Landscape letter width minus margins
           const imgHeight = 8.5 - 0.4; // Landscape letter height minus margins
           const canvasRatio = canvas.height / canvas.width;
-          const pdfRatio = imgHeight / imgWidth;
           
           let finalWidth = imgWidth;
           let finalHeight = imgWidth * canvasRatio;
@@ -669,9 +668,9 @@ document.addEventListener('DOMContentLoaded', function() {
             finalWidth = imgHeight / canvasRatio;
           }
           
-          // Center the image on the page
-          const offsetX = (11 - finalWidth) / 2;
-          const offsetY = (8.5 - finalHeight) / 2;
+          // Position at the top of the page instead of centering vertically
+          const offsetX = (11 - finalWidth) / 2; // Center horizontally
+          const offsetY = 0.2; // Position at the top with a small margin
           
           // Add the image to the PDF with quality settings
           const imgData = canvas.toDataURL('image/png', 1.0); // Use PNG for best text clarity

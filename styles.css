@@ -1,0 +1,415 @@
+/* Base Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background-color: #f8f9fa;
+  color: #333;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px 15px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+h1 {
+  font-size: 28px;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.date-info {
+  font-style: italic;
+  color: #666;
+  font-size: 14px;
+}
+
+/* Filters and Legend Combined */
+.filters-container {
+  margin-bottom: 20px;
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.day-filter {
+  width: 100%;
+}
+
+.filter-label {
+  font-weight: 600;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.day-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.day-button {
+  padding: 8px 12px;
+  border-radius: 20px;
+  background-color: #f1f1f1;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.day-button:hover {
+  background-color: #e0e0e0;
+}
+
+.day-button.active {
+  background-color: #333;
+  color: white;
+}
+
+/* Legend and Expand/Collapse Container */
+.legend-container {
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+  align-items: center;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #666;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.ticketed-legend {
+  display: flex;
+  align-items: center;
+}
+
+.ticketed-indicator {
+  width: 24px;
+  height: 16px;
+  margin-right: 6px;
+  position: relative;
+  border: 1px solid #ccc;
+  border-right-width: 10px;
+  border-right-color: #4a7aff;
+}
+
+/* Expand/Collapse Slider */
+.expand-collapse {
+  display: flex;
+  align-items: center;
+}
+
+.slider-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.slider-label {
+  font-size: 14px;
+  color: #666;
+}
+
+.toggle-slider {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+
+.toggle-slider input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #333;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+/* Export PDF button */
+.export-btn {
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.export-btn:hover {
+  background-color: #555;
+}
+
+/* Schedule grid */
+.schedule {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.day-section {
+  width: 100%;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.day-header {
+  background-color: #333;
+  color: white;
+  padding: 10px 15px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.day-content {
+  padding: 15px;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Event styling */
+.event {
+  padding: 12px;
+  padding-right: 20px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  position: relative;
+  transition: all 0.2s;
+  width: 100%;
+  cursor: pointer;
+}
+
+.event:hover {
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.event.ticketed {
+  padding-right: 30px;
+}
+
+.event-title {
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.event-time {
+  font-size: 14px;
+  color: #666;
+}
+
+.event-details {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+  font-size: 14px;
+  color: #666;
+  display: none;
+}
+
+.event-details div {
+  margin-bottom: 6px;
+}
+
+.event-details div:last-child {
+  margin-bottom: 0;
+}
+
+.event.expanded .event-details {
+  display: block;
+}
+
+.ticketed-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 20px;
+  background-color: #4a7aff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.ticketed-text {
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Time categories - updated ranges */
+.morning {
+  background-color: #e6f4ff;
+  border-color: #b3d7ff;
+}
+
+.afternoon {
+  background-color: #ffede6;
+  border-color: #ffcbb3;
+}
+
+.evening {
+  background-color: #f0e6ff;
+  border-color: #d6b3ff;
+}
+
+/* Empty state */
+.no-events {
+  text-align: center;
+  padding: 40px 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  color: #999;
+  font-style: italic;
+}
+
+/* Loading and error states */
+.loading, .error-message {
+  text-align: center;
+  padding: 40px 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-top: 20px;
+}
+
+.error-message {
+  color: #e74c3c;
+}
+
+/* Print-specific styles */
+@media print {
+  body {
+    background-color: white;
+  }
+  
+  .container {
+    width: 100%;
+    max-width: none;
+  }
+  
+  .filters-container {
+    display: none;
+  }
+  
+  .schedule {
+    display: block;
+  }
+  
+  .day-section {
+    margin-bottom: 20px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  
+  .day-content {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  
+  .event {
+    margin-bottom: 10px;
+  }
+  
+  .event:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .event.expanded .event-details {
+    display: none;
+  }
+  
+  .no-events, .loading, .error-message {
+    display: none !important;
+  }
+}

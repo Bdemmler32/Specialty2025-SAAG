@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schedule At A Glance</title>
+  <!-- Include external CSS -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container" id="schedule-container">
+    <div class="header-image">
+      <img src="SpecialtyWebheader-Main.jpg" alt="Specialty Congress 2025 Header" width="875" height="150">
+    </div>
+    <div class="header">
+      <h1>SCHEDULE AT A GLANCE</h1>
+      <div class="date-info" id="date-info">Loading...</div>
+    </div>
+    
+    <div class="filters-container">
+      <div class="filters">
+        <div class="day-filter">
+          <div class="filter-label">Filter by Day:</div>
+          <div class="day-buttons" id="dayButtons">
+            <!-- Day buttons will be added here -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- Combined Legend and Expand/Collapse -->
+      <div class="legend-container">
+        <div class="legend">
+          <div class="legend-item">
+            <span class="legend-color" style="background-color: #e6f4ff;"></span>
+            <span>Morning</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background-color: #ffede6;"></span>
+            <span>Afternoon</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background-color: #f0e6ff;"></span>
+            <span>Evening</span>
+          </div>
+          <div class="legend-item ticketed-legend">
+            <span class="ticketed-indicator"></span>
+            <span>Ticketed Event</span>
+          </div>
+          <div class="legend-item expand-collapse">
+            <div class="slider-container">
+              <span class="slider-label">Collapse</span>
+              <label class="toggle-slider">
+                <input type="checkbox" id="expandCollapseToggle">
+                <span class="slider"></span>
+              </label>
+              <span class="slider-label">Expand</span>
+            </div>
+          </div>
+          <div class="legend-item">
+            <button id="exportPdfBtn" class="export-btn">Export PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="schedule" id="scheduleGrid">
+      <!-- Event columns will be added here -->
+    </div>
+    
+    <div class="no-events" id="noEvents" style="display: none;">
+      No events found with the current filters.
+    </div>
+    
+    <!-- Loading indicator -->
+    <div class="loading" id="loading">
+      Loading schedule data...
+    </div>
+    
+    <!-- Error message -->
+    <div class="error-message" id="errorMessage" style="display: none;">
+      Error loading schedule data. Please try again later.
+    </div>
+  </div>
+
+  <!-- Include SheetJS library for Excel file handling -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  
+  <!-- Include jsPDF library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  
+  <!-- Include external JavaScript file -->
+  <script src="script.js"></script>
+</body>
+</html>

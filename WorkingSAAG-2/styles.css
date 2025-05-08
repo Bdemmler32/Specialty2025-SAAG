@@ -82,11 +82,13 @@ body {
 .sched-search-container {
   width: 100%;
   padding-top: 15px;
+  margin-top: 15px; /* Add spacing from elements above */
   margin-bottom: 15px;
   border-bottom: 1px solid #eee;
   padding-bottom: 15px;
   animation: expandDown 0.3s ease-out forwards;
   overflow: hidden;
+  clear: both; /* Ensure it starts on a new line */
 }
 
 @keyframes expandDown {

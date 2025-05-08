@@ -561,6 +561,10 @@ document.addEventListener('DOMContentLoaded', function() {
         headerImage.style.display = 'block';
         headerImage.style.width = '100%';
         headerImage.style.textAlign = 'center';
+        headerImage.style.marginBottom = '15px';
+        headerImage.style.borderRadius = '8px';
+        headerImage.style.overflow = 'hidden';
+        headerImage.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
         
         // Use the PDF-specific header image
         const img = headerImage.querySelector('img');
@@ -570,6 +574,7 @@ document.addEventListener('DOMContentLoaded', function() {
           img.style.maxWidth = '1050px'; // Set to slightly less than container width for margins
           img.style.height = 'auto';
           img.style.margin = '0 auto';
+          img.style.display = 'block';
         }
       }
       

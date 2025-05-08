@@ -231,17 +231,6 @@ document.addEventListener('DOMContentLoaded', function() {
         filteredEvents: [...filteredEvents]
       };
       
-      // Move search container below everything in filters section
-      const filtersContainer = document.querySelector('.sched-filters-container');
-      if (filtersContainer) {
-        const filtersElements = filtersContainer.querySelectorAll('.sched-filters, .sched-legend-container');
-        // Insert search container before the legend container
-        if (filtersElements.length > 0) {
-          const lastElement = filtersElements[filtersElements.length - 1];
-          filtersContainer.insertBefore(searchContainer, lastElement);
-        }
-      }
-      
       // Show search container with animation
       searchContainer.style.display = 'block';
       searchInput.focus();

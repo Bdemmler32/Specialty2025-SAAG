@@ -541,6 +541,28 @@ document.addEventListener('DOMContentLoaded', function() {
       const originalContainer = document.getElementById('schedule-container');
       const pdfContainer = originalContainer.cloneNode(true);
       
+      // Generate filename with current date
+      let pdfFilename = 'Specialty2025-SAAG';
+      
+      // Extract the date from the Current as of text
+      const dateText = dateInfo.textContent;
+      if (dateText && dateText.includes('Current as of')) {
+        const dateMatch = dateText.match(/Current as of ([\d\/]+)/);
+        if (dateMatch && dateMatch[1]) {
+          // Convert date format to MMDDYYYY
+          const dateParts = dateMatch[1].split('/');
+          if (dateParts.length === 3) {
+            const month = dateParts[0].padStart(2, '0');
+            const day = dateParts[1].padStart(2, '0');
+            const year = dateParts[2];
+            pdfFilename += `-${month}${day}${year}`;
+          }
+        }
+      }
+      
+      // Add .pdf extension
+      pdfFilename += '.pdf';
+      
       // Set the container to a fixed width for PDF export
       pdfContainer.style.width = '1100px';
       pdfContainer.style.maxWidth = 'none';
@@ -900,7 +922,7 @@ document.addEventListener('DOMContentLoaded', function() {
           pdf.addImage(imgData, 'PNG', offsetX, offsetY, finalWidth, finalHeight, undefined, 'FAST');
           
           // Save the PDF - which also triggers the download dialog
-          pdf.save('schedule-at-a-glance.pdf');
+          pdf.save(pdfFilename);
           
         } catch (innerError) {
           console.error("Error in PDF generation:", innerError);

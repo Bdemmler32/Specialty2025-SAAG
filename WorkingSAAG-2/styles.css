@@ -49,7 +49,7 @@ body {
   color: #666;
   position: absolute;
   top: 15px; /* Aligned with the filter label */
-  right: 50px; /* Added more padding to avoid collision with search icon */
+  right: 15px; /* Added padding to the right */
 }
 
 /* Filters and Legend Combined */
@@ -66,7 +66,7 @@ body {
 /* Search icon styles */
 .sched-search-icon {
   position: absolute;
-  top: 15px; /* Aligned with filter label and date info */
+  top: 50px; /* Positioned below date info */
   right: 15px;
   cursor: pointer;
   color: #666;
@@ -513,17 +513,6 @@ input:checked + .sched-slider:before {
   .sched-event {
     padding: 10px;
   }
-  
-  .sched-date-info {
-    position: static;
-    text-align: left;
-    margin-bottom: 15px;
-    display: block;
-  }
-  
-  .sched-search-icon {
-    top: 15px;
-  }
 }
 
 @media screen and (max-width: 480px) {
@@ -545,11 +534,6 @@ input:checked + .sched-slider:before {
   
   .sched-ticketed-badge {
     width: 15px;
-  }
-  
-  .sched-search-icon {
-    top: auto;
-    bottom: 15px;
   }
 }
 

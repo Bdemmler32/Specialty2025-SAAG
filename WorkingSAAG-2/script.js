@@ -461,7 +461,7 @@ document.addEventListener('DOMContentLoaded', function() {
       keywords.forEach(keyword => {
         const trimmedKeyword = keyword.trim();
         if (trimmedKeyword) {
-          detailsHTML += `<span class="sched-keyword-tag">${trimmedKeyword}</span>`;
+          detailsHTML += `<span class="sched-keyword-tag" data-keyword="${trimmedKeyword}">${trimmedKeyword}</span>`;
         }
       });
       
@@ -485,7 +485,32 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Add click event to expand/collapse for all events
-    element.addEventListener('click', function() {
+    element.addEventListener('click', function(e) {
+      // Check if the click was on a keyword tag
+      if (e.target.classList.contains('sched-keyword-tag')) {
+        // Prevent the event from triggering the card expand/collapse
+        e.stopPropagation();
+        
+        // Get the keyword text
+        const keyword = e.target.getAttribute('data-keyword');
+        
+        // Trigger search with this keyword
+        if (keyword) {
+          // Open the search container if it's not already open
+          if (!isSearchActive) {
+            toggleSearch();
+          }
+          
+          // Set the search input value to the keyword
+          searchInput.value = keyword;
+          
+          // Perform the search
+          performSearch(keyword);
+        }
+        return;
+      }
+      
+      // If not clicked on a keyword tag, toggle expanded state
       this.classList.toggle('expanded');
     });
     
@@ -530,14 +555,21 @@ document.addEventListener('DOMContentLoaded', function() {
         filtersContainer.style.display = 'none';
       }
       
-      // Show header image for PDF export
+      // Show header image for PDF export and ensure it's full width
       const headerImage = pdfContainer.querySelector('.sched-header-image');
       if (headerImage) {
         headerImage.style.display = 'block';
+        headerImage.style.width = '100%';
+        headerImage.style.textAlign = 'center';
+        
         // Use the PDF-specific header image
         const img = headerImage.querySelector('img');
         if (img) {
           img.src = 'SpecialtyWebheader-ExportPDF.jpg';
+          img.style.width = '100%';
+          img.style.maxWidth = '1050px'; // Set to slightly less than container width for margins
+          img.style.height = 'auto';
+          img.style.margin = '0 auto';
         }
       }
       

@@ -586,7 +586,8 @@ document.addEventListener('DOMContentLoaded', function() {
         headerImage.style.marginBottom = '15px';
         headerImage.style.borderRadius = '8px';
         headerImage.style.overflow = 'hidden';
-        headerImage.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+        headerImage.style.boxShadow = '0 2px 5px rgba(0,0,0,0.15)'; // Enhanced drop shadow to match page
+        headerImage.style.border = '1px solid rgba(0,0,0,0.1)'; // Added thin stroke
         
         // Use the PDF-specific header image
         const img = headerImage.querySelector('img');
@@ -597,6 +598,7 @@ document.addEventListener('DOMContentLoaded', function() {
           img.style.height = 'auto';
           img.style.margin = '0 auto';
           img.style.display = 'block';
+          img.style.borderRadius = '8px'; // Rounded corners for the image itself
         }
       }
       
